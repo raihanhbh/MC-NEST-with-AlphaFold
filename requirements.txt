@@ -1,0 +1,5 @@
+py3Dmol
+Bio
+streamlit 
+requests
+openai
