@@ -137,7 +137,8 @@ def get_predicted_sequence_with_hypothesis (user_config: dict)-> tuple:
         background_information=get_background_info(sequence=user_config["sequence_input"].strip()),  # Background information for the sequence
         max_rollouts=user_config["max_rollouts"],  # Number of rollouts to perform
         selection_policy=user_config["selection_policy_value"],  # Selection policy (GREEDY, IMPORTANCE_SAMPLING, etc.)
-        initialize_strategy=user_config["zero_shot"]   # Initialization strategy (ZERO_SHOT or DUMMY_ANSWER)
+        initialize_strategy=user_config["zero_shot"],   # Initialization strategy (ZERO_SHOT or DUMMY_ANSWER)
+        openai_token=user_config["openai_token"],  # OpenAI API token
     )
 
     # Run the Monte Carlo NEST algorithm

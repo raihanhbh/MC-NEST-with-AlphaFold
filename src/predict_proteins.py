@@ -100,6 +100,7 @@ class MC_NEST(BaseModel):
     excess_reward_penalty: int = 5
     selection_policy: int
     initialize_strategy: int
+    openai_token: str
 
     def __init__(self, **data):
         super().__init__(**data)
@@ -190,6 +191,8 @@ class MC_NEST(BaseModel):
         raise NotImplementedError()
 
     def initialize(self):
+        if self.openai_token:
+            openai.api_key = self.openai_token
         if self.initialize_strategy == ZERO_SHOT:
             response_text = self.zero_shot()
             self.root = Node(answer=response_text)
@@ -330,7 +333,7 @@ class MC_NEST_gpt4o(MC_NEST):
             max_tokens=5000,
             response_format={"type": "json_object"},
         )
-        print("Refined answer response:", refined_answer_response.choices[0].message.content, end="\n\n")
+        
         refined_answer = RefineResponse.model_validate_json(
             refined_answer_response.choices[0].message.content
         )
