@@ -1,16 +1,17 @@
 # Protein Structure Prediction
 
 ## Overview
-The Protein Structure Prediction project is designed to predict and visualize the three-dimensional structures of proteins based on their amino acid sequences. This project utilizes the MC-NEST algorithm for structure prediction and provides a user-friendly interface built with Streamlit. The predicted structures are visualized using the py3Dmol library.
+The Protein Structure Prediction project leverages the MC-NEST algorithm integrated with OpenAI's GPT-4o model to predict and refine protein structures based on amino acid sequences. The project includes advanced hypothesis generation and evaluation mechanisms, enabling detailed insights into protein sequences. A user-friendly Streamlit interface is provided for interaction, and the predicted structures are visualized using the py3Dmol library.
 
 ## Project Structure
 ```
 protein-structure-prediction
 ├── src
 │   ├── app.py                # Main application script for Streamlit interface
-│   ├── predict_proteins.py    # Implementation of the MC-NEST algorithm
-│   └── utils
-│       └── __init__.py       # Initialization file for utils module
+│   ├── predict_proteins.py    # Implementation of the MC-NEST algorithm with GPT-4o integration
+│   ├── utils
+│   │   ├── __init__.py       # Initialization file for utils module
+│   │   └── st_utils.py       # Utility functions for Streamlit integration
 ├── requirements.txt           # List of required Python packages
 ├── README.md                  # Project documentation
 └── .gitignore                 # Files and directories to ignore by Git
