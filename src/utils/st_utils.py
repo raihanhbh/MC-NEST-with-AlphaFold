@@ -79,7 +79,6 @@ def save_pdb_as_png_with_pymol(pdb_data: str, output_path: str):
     png {output_path}, width=800, height=600, ray=1
     quit
     """
-    print(f"PyMOL script created:\n{pymol_script}")
 
     # Write script to temp file
     with tempfile.NamedTemporaryFile(delete=False, suffix=".pml") as temp_script:
