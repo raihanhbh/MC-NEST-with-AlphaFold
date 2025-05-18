@@ -134,9 +134,9 @@ def compute_biophysical_properties(sequence: str)-> dict:
     hydrophobicity = sum(1 for aa in sequence if aa in 'VILFMWY') / len(sequence)  # Hydrophobic index
 
     return {
-        "Molecular Weight (Da)": molecular_weight,
-        "Instability Index": instability_index,
-        "Hydrophobicity Index": hydrophobicity
+        "Molecular Wt. (Da)": molecular_weight,
+        "Instability I.": instability_index,
+        "Hydrophobicity I.": hydrophobicity
     }
 
 def validate_openai_token(token: str)-> bool:
@@ -188,7 +188,7 @@ def show_pdb_structure(title: str, sequence: str)-> str:
         show_structure(pdb, title)
         # save_pdb_as_png(pdb, output_path=f"{make_filename_safe(title)}.png")
         # save_pdb_as_png_with_pymol(pdb, output_path=f"{make_filename_safe(title)}_pymol.png")
-        plot_pdb_backbone(pdb, output_path=f"/tmp/{make_filename_safe(title)}_backbone.png")
+        plot_pdb_backbone(pdb, output_path=f"/tmp/{make_filename_safe(title)}_backbone_{st.session_state.session_id}.png")
         return pdb
     return None
 
@@ -209,9 +209,9 @@ def get_bio_prop_evaluation_results(sequence: str)-> dict:
     
     return {
         "RMSD": rmsd,
-        "Molecular Weight (Da)": bio_properties["Molecular Weight (Da)"],
-        "Instability Index": bio_properties["Instability Index"],
-        "Hydrophobicity Index": bio_properties["Hydrophobicity Index"]
+        "Molecular Wt. (Da)": bio_properties["Molecular Wt. (Da)"],
+        "Instability I.": bio_properties["Instability I."],
+        "Hydrophobicity I.": bio_properties["Hydrophobicity I."]
     }
 
 def get_predicted_sequence_with_hypothesis (user_config: dict)-> tuple:

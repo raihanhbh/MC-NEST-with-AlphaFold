@@ -3,6 +3,8 @@ import pandas as pd
 from inputs import get_user_inputs
 import utils.st_utils as st_utils
 from utils.pdf_report_generate import run_full_pdf_generation_ui
+from datetime import datetime, timezone
+import uuid
 from utils.constants import (
     VALID_TOKEN_KEY,
     OPENAI_TOKEN_KEY,
@@ -17,6 +19,11 @@ from utils.constants import (
 # -------------------- Streamlit UI for Protein Structure Prediction -------------------- #
 
 
+
+if "session_id" not in st.session_state:
+    timestamp = datetime.now(timezone.utc).isoformat()
+    st.session_state.session_id = f"{uuid.uuid4()}_{timestamp}"
+    
 # Streamlit UI
 st.title("AI as Co-Scientist: Collaborative AI Agents")
 

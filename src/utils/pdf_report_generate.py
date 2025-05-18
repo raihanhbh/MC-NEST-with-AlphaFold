@@ -147,21 +147,25 @@ def insert_side_by_side_images(pdf_obj, img1_path, img2_path, caption1, caption2
     pdf_obj.ln(10)
 
 def add_dataframe_table_to_pdf(pdf, df):
-    pdf.set_font("Times", 'B', 11)
-    col_width = pdf.w / (len(df.columns) + 1)  # Dynamic width based on columns
+    max_width = pdf.w - pdf.l_margin - pdf.r_margin
+    n_cols = len(df.columns) + 1  # +1 for index/row header
+    col_width = max_width / n_cols
     row_height = 8
 
     # Header
+    pdf.set_font("Times", 'B', 11)
+    pdf.set_fill_color(240, 240, 240)
     for col in ['Metric'] + list(df.columns):
-        pdf.cell(col_width, row_height, col, border=1, align='C')
+        pdf.cell(col_width, row_height, str(col), border=1, align='C', fill=True)
     pdf.ln()
 
     # Rows
     pdf.set_font("Times", '', 10)
     for idx, row in df.iterrows():
-        pdf.cell(col_width, row_height, str(idx), border=1)
+        pdf.cell(col_width, row_height, str(idx), border=1, align='C')
         for cell in row:
-            pdf.cell(col_width, row_height, f"{cell:.3f}" if isinstance(cell, float) else str(cell), border=1)
+            value = f"{cell:.3f}" if isinstance(cell, float) else str(cell)
+            pdf.cell(col_width, row_height, value, border=1, align='C')
         pdf.ln()
               
 def generate_pdf_documentation(intro, background, methodology, result_analysis, conclusion):
@@ -184,8 +188,8 @@ def generate_pdf_documentation(intro, background, methodology, result_analysis, 
         if title == "Methodology":
             pass
         elif title == "Results and Analysis":
-            image_path1 = "/tmp/user_input_structure_backbone.png"
-            image_path2 = "/tmp/synthetic_structure_backbone.png"
+            image_path1 = f"/tmp/user_input_structure_backbone_{st.session_state.session_id}.png"
+            image_path2 = f"/tmp/synthetic_structure_backbone_{st.session_state.session_id}.png"
             insert_side_by_side_images(
                 pdf,
                 img1_path=image_path1,
@@ -219,7 +223,7 @@ def generate_pdf_documentation(intro, background, methodology, result_analysis, 
             # insert_image_with_caption(pdf, image_path, "Figure 2: Synthetic Structure")
             
 
-    temp_pdf_path = "/tmp/protein_documentation.pdf"
+    temp_pdf_path = f"/tmp/protein_documentation_{st.session_state.session_id}.pdf"
     pdf.output(temp_pdf_path)
     with open(temp_pdf_path, "rb") as f:
         pdf_buffer = BytesIO(f.read())
