@@ -2,24 +2,29 @@ import streamlit as st
 import pandas as pd
 from inputs import get_user_inputs
 import utils.st_utils as st_utils
+from utils.pdf_report_generate import run_full_pdf_generation_ui
+from utils.constants import (
+    VALID_TOKEN_KEY,
+    OPENAI_TOKEN_KEY,
+    SEQUENCE_INPUT_KEY,
+    PDB_STRUCTURES_KEY,
+    BEST_HYPOTHESIS_KEY,
+    EVALUATION_RESULTS_KEY,
+    FOXM1,
+    MYC,
+    RMSD
+)
+# -------------------- Streamlit UI for Protein Structure Prediction -------------------- #
 
-# Constants
-VALID_TOKEN_KEY = "valid_token"
-OPENAI_TOKEN_KEY = "openai_token"
-SEQUENCE_INPUT_KEY = "sequence_input"
-PDB_STRUCTURES_KEY = "pdb_structures"
-EVALUATION_RESULTS_KEY = "evaluation_results"
-FOXM1 = "FOXM1"
-MYC = "MYC"
-RMSD = "RMSD"
 
 # Streamlit UI
-st.title("Protein Structure Prediction using MC-NEST")
+st.title("AI as Co-Scientist: Collaborative AI Agents")
 
 st.sidebar.header("API Configuration")
 st.session_state[VALID_TOKEN_KEY] = st.session_state.get(VALID_TOKEN_KEY, False)
 st.session_state[OPENAI_TOKEN_KEY] = st.session_state.get(OPENAI_TOKEN_KEY, None)
 st.session_state[PDB_STRUCTURES_KEY] = st.session_state.get(PDB_STRUCTURES_KEY, [])
+st.session_state[BEST_HYPOTHESIS_KEY] = st.session_state.get(BEST_HYPOTHESIS_KEY, None)
 st.session_state[EVALUATION_RESULTS_KEY] = st.session_state.get(EVALUATION_RESULTS_KEY, {})
 # Load all input values
 user_config = get_user_inputs()
@@ -59,6 +64,7 @@ if st.session_state.valid_token and st.button("Predict & Visualize"):
                 best_hypothesis = process_synthetic_structure(user_config)
         
         # Display the predicted structure and evaluation results
+        st.session_state[BEST_HYPOTHESIS_KEY] = best_hypothesis
         st.success(best_hypothesis)
         
         
@@ -70,5 +76,13 @@ if st.session_state.valid_token and st.button("Predict & Visualize"):
     else:
         st.warning("Please enter a valid protein sequence.")
 
+if all([st.session_state[OPENAI_TOKEN_KEY], st.session_state[BEST_HYPOTHESIS_KEY]]):
+    run_full_pdf_generation_ui(
+        st.session_state[OPENAI_TOKEN_KEY],
+        st.session_state[BEST_HYPOTHESIS_KEY],
+        # st.session_state[EVALUATION_RESULTS_KEY],
+        # st.session_state[PDB_STRUCTURES_KEY][0]
+    )
+        
 # --- Footer: Supported Organization Logos ---
-st_utils.show_organization_logos()
+# st_utils.show_organization_logos()

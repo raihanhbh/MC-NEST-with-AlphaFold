@@ -1,0 +1,10 @@
+# Constants
+VALID_TOKEN_KEY = "valid_token"
+OPENAI_TOKEN_KEY = "openai_token"
+SEQUENCE_INPUT_KEY = "sequence_input"
+PDB_STRUCTURES_KEY = "pdb_structures"
+BEST_HYPOTHESIS_KEY = "best_hypothesis"
+EVALUATION_RESULTS_KEY = "evaluation_results"
+FOXM1 = "FOXM1"
+MYC = "MYC"
+RMSD = "RMSD"

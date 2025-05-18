@@ -2,8 +2,13 @@ import streamlit as st
 import streamlit.components.v1 as components
 import requests
 from Bio.PDB import PDBParser, Superimposer
-from io import StringIO
+from io import StringIO, BytesIO
 import py3Dmol
+from PIL import Image
+import re
+import os
+import tempfile
+import matplotlib.pyplot as plt
 from predict_proteins import MC_NEST_gpt4o
 
 VALID_TOKEN_KEY = "valid_token"
@@ -33,6 +38,73 @@ def show_structure(pdb_data: dict, name: str)-> None:
     html = view._make_html()
     components.html(html, height=400)
 
+def plot_pdb_backbone(pdb_data: str, output_path: str):
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdb", mode='w') as f:
+        f.write(pdb_data)
+        file_path = f.name
+
+    parser = PDBParser(QUIET=True)
+    structure = parser.get_structure("X", file_path)
+
+    x, y, z = [], [], []
+    for atom in structure.get_atoms():
+        if atom.get_name() == "CA":  # alpha-carbon backbone
+            coord = atom.get_coord()
+            x.append(coord[0])
+            y.append(coord[1])
+            z.append(coord[2])
+
+    plt.figure(figsize=(6, 4))
+    plt.plot(x, y, '-o')
+    plt.title("Backbone (CA) 2D Projection")
+    plt.savefig(output_path)
+    plt.close()
+
+    os.remove(file_path)
+
+def save_pdb_as_png_with_pymol(pdb_data: str, output_path: str):
+    # Write PDB to temp file
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdb") as temp_pdb:
+        temp_pdb.write(pdb_data.encode())
+        temp_pdb_path = temp_pdb.name
+
+    print(f"Temp PDB file created at: {temp_pdb_path}")
+    # PyMOL rendering script
+    pymol_script = f"""
+    load {temp_pdb_path}
+    hide everything
+    show cartoon
+    spectrum count, rainbow
+    bg_color white
+    png {output_path}, width=800, height=600, ray=1
+    quit
+    """
+    print(f"PyMOL script created:\n{pymol_script}")
+
+    # Write script to temp file
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pml") as temp_script:
+        temp_script.write(pymol_script.encode())
+        temp_script_path = temp_script.name
+
+    # Execute PyMOL
+    os.system(f"pymol -cq {temp_script_path}")
+
+    # Clean up
+    # os.unlink(temp_pdb_path)
+    # os.unlink(temp_script_path)
+
+def save_pdb_as_png(pdb_data: str, output_path: str = "structure.png"):
+    view = py3Dmol.view(width=400, height=400)
+    view.addModel(pdb_data, "pdb")
+    view.setStyle({"cartoon": {"color": "spectrum"}})
+    view.zoomTo()
+    view.render()  # Required for proper rendering before PNG export
+
+    png_data = view.png()
+    img = Image.open(BytesIO(png_data))
+    img.save(output_path)
+    print(f"Saved: {output_path}")
+    
 # Compare two PDB structures using RMSD
 def compute_rmsd(pdb1: dict, pdb2: dict)-> float:
     parser = PDBParser(QUIET=True)
@@ -99,12 +171,24 @@ def is_valid_token(openai_token: str, st: st)-> bool:
 
     return st.session_state.valid_token
 
+def make_filename_safe(text: str) -> str:
+    # Lowercase the text
+    text = text.lower()
+    # Replace spaces and hyphens with underscores
+    text = re.sub(r'[\s\-]+', '_', text)
+    # Remove any characters that are not alphanumeric or underscores
+    text = re.sub(r'[^\w_]', '', text)
+    return text
+
 def show_pdb_structure(title: str, sequence: str)-> str:
     """Display the PDB structure using py3Dmol."""
     st.info(title)
     pdb = predict_structure(sequence)
     if pdb:
         show_structure(pdb, title)
+        # save_pdb_as_png(pdb, output_path=f"{make_filename_safe(title)}.png")
+        # save_pdb_as_png_with_pymol(pdb, output_path=f"{make_filename_safe(title)}_pymol.png")
+        plot_pdb_backbone(pdb, output_path=f"{make_filename_safe(title)}_backbone.png")
         return pdb
     return None
 

@@ -18,16 +18,17 @@ def get_user_inputs():
 
     
     default_sequence = "MARTKQTARKSTGGKAPRKQLASKAARKSAARAAAAGGGGGGG"
-    sequence_input = st.text_input("Enter a protein sequence (e.g., FOXM1) to predict and visualize its structure.", value=default_sequence, max_chars=100, help="Enter the protein sequence to predict its structure.")
+    sequence_input = st.text_input("Enter a protein sequence (e.g., FOXM1) to predict and visualize its structure.", value=default_sequence, max_chars=1000, help="Enter the protein sequence to predict its structure.")
 
-    zero_shot = st.sidebar.number_input(
-        label="Zero Shot",
-        min_value=1,
-        max_value=1,
-        value=1,
-        step=1,
-        help="Controls how many Zero Shots are done. Higher values increase OpenAI API cost."
-    )
+    zero_shot = 1
+    # zero_shot = st.sidebar.number_input(
+    #     label="Zero Shot",
+    #     min_value=1,
+    #     max_value=1,
+    #     value=1,
+    #     step=1,
+    #     help="Controls how many Zero Shots are done. Higher values increase OpenAI API cost."
+    # )
 
     max_rollouts = st.sidebar.number_input(
         label="Max Rollouts",

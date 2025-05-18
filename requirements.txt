@@ -3,3 +3,5 @@ Bio
 streamlit 
 requests
 openai
+fpdf
+matplotlib

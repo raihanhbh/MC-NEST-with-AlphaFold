@@ -1,3 +1,5 @@
 .DS_Store
 chatGPT_api_token.txt
 *.pyc
+synthetic_structure_backbone.png
+user_input_structure_backbone.png
