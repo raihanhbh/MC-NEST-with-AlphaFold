@@ -188,7 +188,7 @@ def show_pdb_structure(title: str, sequence: str)-> str:
         show_structure(pdb, title)
         # save_pdb_as_png(pdb, output_path=f"{make_filename_safe(title)}.png")
         # save_pdb_as_png_with_pymol(pdb, output_path=f"{make_filename_safe(title)}_pymol.png")
-        plot_pdb_backbone(pdb, output_path=f"{make_filename_safe(title)}_backbone.png")
+        plot_pdb_backbone(pdb, output_path=f"/tmp/{make_filename_safe(title)}_backbone.png")
         return pdb
     return None
 

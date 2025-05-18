@@ -7,6 +7,7 @@ import base64
 import os
 import re
 import unicodedata
+import pandas as pd
 from utils.constants import (
     VALID_TOKEN_KEY,
     OPENAI_TOKEN_KEY,
@@ -62,11 +63,11 @@ def sanitize_text(text):
 
 class JournalPDF(FPDF):
     pdf_sections = [
-        "Introduction",
-        "Background",
-        "Methodology",
-        "Results and Analysis",
-        "Conclusion"
+        "introduction",
+        "background",
+        "methodology",
+        "results and analysis",
+        "conclusion"
     ]
     def __init__(self):
         super().__init__()
@@ -86,9 +87,9 @@ class JournalPDF(FPDF):
         pattern = r'(\*\*[^*]+\*\*)'
         parts = re.split(pattern, text)
         for part in parts:
-            if part.startswith('**') and part.endswith('**') and part[2:-2] in self.pdf_sections:
+            if part.startswith('**') and part.endswith('**') and str.lower(part[2:-2]) in self.pdf_sections:
                 pass 
-            elif (part.startswith('#') or part.endswith('##')) and part[2:-2] in self.pdf_sections:
+            elif (part.startswith('#') or part.endswith('##') or part.endswith('###')) and str.lower(part[2:-2]) in self.pdf_sections:
                 pass 
             elif part.startswith('**') and part.endswith('**'):
                 self.set_font("Times", 'B', 12)
@@ -144,7 +145,25 @@ def insert_side_by_side_images(pdf_obj, img1_path, img2_path, caption1, caption2
     pdf_obj.set_x(x_start + image_width + spacing)
     pdf_obj.cell(image_width, 5, caption2, border=0, ln=1, align="C")
     pdf_obj.ln(10)
-        
+
+def add_dataframe_table_to_pdf(pdf, df):
+    pdf.set_font("Times", 'B', 11)
+    col_width = pdf.w / (len(df.columns) + 1)  # Dynamic width based on columns
+    row_height = 8
+
+    # Header
+    for col in ['Metric'] + list(df.columns):
+        pdf.cell(col_width, row_height, col, border=1, align='C')
+    pdf.ln()
+
+    # Rows
+    pdf.set_font("Times", '', 10)
+    for idx, row in df.iterrows():
+        pdf.cell(col_width, row_height, str(idx), border=1)
+        for cell in row:
+            pdf.cell(col_width, row_height, f"{cell:.3f}" if isinstance(cell, float) else str(cell), border=1)
+        pdf.ln()
+              
 def generate_pdf_documentation(intro, background, methodology, result_analysis, conclusion):
     section_titles = [
         ("Introduction", intro),
@@ -165,8 +184,8 @@ def generate_pdf_documentation(intro, background, methodology, result_analysis, 
         if title == "Methodology":
             pass
         elif title == "Results and Analysis":
-            image_path1 = "/tmp/user_input_structure.png"
-            image_path2 = "/tmp/synthetic_structure.png"
+            image_path1 = "/tmp/user_input_structure_backbone.png"
+            image_path2 = "/tmp/synthetic_structure_backbone.png"
             insert_side_by_side_images(
                 pdf,
                 img1_path=image_path1,
@@ -174,6 +193,22 @@ def generate_pdf_documentation(intro, background, methodology, result_analysis, 
                 caption1="Figure 1: User Input Structure",
                 caption2="Figure 2: Synthetic Structure"
             )
+            
+            # Convert evaluation data to DataFrame
+            eval_data = st.session_state[EVALUATION_RESULTS_KEY]
+            if eval_data:
+                df = pd.DataFrame(eval_data).T
+                pdf.set_font("Times", 'B', 12)
+                pdf.cell(0, 10, "Evaluation Table", ln=True)
+                add_dataframe_table_to_pdf(pdf, df)
+
+                # Add RMSD summary line
+                myc_rmsd = eval_data.get("MYC", {}).get("RMSD")
+                if myc_rmsd:
+                    pdf.ln(4)
+                    pdf.set_font("Times", 'I', 10)
+                    pdf.cell(0, 10, f"RMSD between FOXM1 and MYC structures: {myc_rmsd:.3f} Å", ln=True)
+            
             pdf.chapter_body(content)
         else:
             pdf.chapter_body(content)
